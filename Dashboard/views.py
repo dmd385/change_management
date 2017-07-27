@@ -41,8 +41,10 @@ def getTabs(user_id):
     elif user.groups.filter(name='client').exists():
         return [tabHome, tabView, tabViewClosed, tabCalendar]
     elif user.groups.filter(name='admin').exists():
-
-        return [tabView, tabViewClosed, tabCreate, tabNewCompany, tabNewUser, tabNewInfra, tabLogs, tabCalendar]
+        if user.super_admin == False:
+            return [tabView, tabViewClosed, tabCreate, tabLogs, tabCalendar]
+        else:
+            return [tabView, tabViewClosed, tabCreate, tabNewCompany, tabNewUser, tabNewInfra, tabLogs, tabCalendar]
     else:
         return [tabView]
 
@@ -353,10 +355,12 @@ def newLocation(request, user_id):
 
 @login_required()
 def dashboard(request, user_id):
-    user = get_object_or_404(User, pk=user_id)
+    user = User.objects.get(pk=user_id).id
     content = {'userr': user,
                'tabs': getTabs(user_id),
                'tab': tabView}
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = 'true'
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -379,7 +383,6 @@ def newInfra(request, user_id):
         bet = 1
     else:
         pass
-    user = request.user
     content = {
             'userr': user,
             'tabs': getTabs(user_id),
@@ -390,7 +393,7 @@ def newInfra(request, user_id):
             'infs': Infra.objects.order_by('location__company__name'),
             'tab': tabNewInfra
         }
-    if bet==1:
+    if bet == 1:
         content['good'] = "Infrastructure created successfully"
     return render(request, 'Dashboard/dash.html', content)
 
@@ -434,7 +437,7 @@ def editInfra(request, user_id, infra_id):
 
 @login_required()
 def deleteInfra(request, user_id, infra_id):
-    user = request.user
+    user = User.objects.get(pk=user_id)
     infra = Infra.objects.get(pk=infra_id)
     name = infra.location.company.name+"-"+infra.name
     infra.delete()
@@ -458,37 +461,31 @@ def deleteInfra(request, user_id, infra_id):
 
 @login_required()
 def newOS(request, user_id):
-    bet = 0
-    user = request.user
-    if request.method == 'POST':
-        new = OS(name=request.POST.get('os'))
-        new.save()
-        bet=1
-        dataLogger = logging.getLogger("dataLogger")
-        dataLogger.info(datetime.today().strftime(
-            "%m/%d/%Y %H:%M")+": "+
-            user.username + " createdOS " + new.name)
-    else:
-        pass
-    user = request.user
+    user = User.objects.get(pk=user_id)
+    new = OS(name=request.POST.get('os'))
+    new.save()
+    dataLogger = logging.getLogger("dataLogger")
+    dataLogger.info(datetime.today().strftime(
+        "%m/%d/%Y %H:%M")+": "+
+        user.username + " createdOS " + new.name)
     content = {
-            'userr': user,
-            'tabs': getTabs(user_id),
-            'company': Company.objects.all(),
-            'oss': OS.objects.all(),
-            'infts': InfraType.objects.all(),
-            'locs': Location.objects.order_by('company__name'),
-            'infs': Infra.objects.order_by('location__company__name'),
-            'tab': tabNewInfra
-        }
-    if bet==1:
-        content['good'] = "OS created successfully"
+        'userr': user,
+        'tabs': getTabs(user_id),
+        'company': Company.objects.all(),
+        'oss': OS.objects.all(),
+        'infts': InfraType.objects.all(),
+        'locs': Location.objects.order_by('company__name'),
+        'infs': Infra.objects.order_by('location__company__name'),
+        'tab': tabNewInfra
+    }
+    content['good'] = "OS created successfully"
     return render(request, 'Dashboard/dash.html', content)
+
 
 @login_required()
 def newInfraType(request, user_id):
     bet = 0
-    user = request.user
+    user = User.objects.get(pk=user_id)
     if request.method == 'POST':
         new = InfraType(name=request.POST.get('inf_type'))
         new.save()
@@ -522,7 +519,7 @@ def viewDetail(request, user_id, view_id):
     user = User.objects.get(pk=user_id)
     dataLogger = logging.getLogger("dataLogger")
     if request.method == 'POST':
-        if(request.POST.get('denyyy')!=None and request.POST.get('denyyy')!=""):
+        if(request.POST.get('denyyy') is None and request.POST.get('denyyy')!=""):
             if user.groups.filter(name='admin').exists():
                 view.internal_auth=False
                 view.internal_auth_date=datetime.today()
@@ -564,9 +561,6 @@ def viewDetail(request, user_id, view_id):
             view.act_time = request.POST.get('act_time')
             dataLogger.info(datetime.today().strftime("%m/%d/%Y %H:%M") + ": " +
                         user.username + " editedChange " + view.infra.location.company.name + ": " + view.infra.location.street + ": " + view.title)
-        #view.quote=request.FILES['myfile']
-        #fs = FileSystemStorage()
-        #fs.save(view.quote.name, view.quote)
         view.save()
         content = {
             'userr': user,
@@ -650,7 +644,7 @@ def viewDetail(request, user_id, view_id):
             content['changes'] = Change.objects.filter(infra__location__company=user.company, open=True)
             content['locs'] = Location.objects.filter(company=user.company)
     if user.groups.filter(name='admin').exists() and view.work_done is False:
-        content['admin']="ad"
+        content['admin'] = "ad"
     if user.groups.filter(name='admin').exists():
         content['ad'] = ' '
     elif user.groups.filter(name='engineer').exists() and view.work_done is False:
@@ -664,7 +658,7 @@ def viewDetail(request, user_id, view_id):
         content['w_date'] = datetime.strftime(view.work_done_stamp, "%m/%d/%Y %H/%m")
         content['w_user'] = user
     if view.act_time is None:
-        content['act_time']=0
+        content['act_time'] = 0
     content['view'] = 'True'
     content['titlee'] = view.title
     content['den_reason']=view.customer_deny_exp
@@ -692,7 +686,7 @@ def viewDetail(request, user_id, view_id):
         content['cust_deny']=view.customer_deny_exp
     if view.internal_auth is False and view.internal_auth_date is None:
         content['idenied'] = "dd"
-        content['int_deny']  =view.internal_deny_exp
+        content['int_deny'] = view.internal_deny_exp
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -703,7 +697,7 @@ def export(request, user_id, view_id):
     view = Change.objects.get(pk=view_id)
     dynamic = 'attachment; filename="change_request_'+view.title+'_'+datetime.today().strftime("%m/%d/%Y")+'.csv"'
     response['Content-Disposition'] = dynamic
-    user = request.user
+    user = User.objects.get(pk=user_id)
     change = Change.objects.get(pk=view_id)
     writer = csv.writer(response)
     writer.writerow(['User: ', user.username])
@@ -723,15 +717,15 @@ def export(request, user_id, view_id):
     writer.writerow(['Client: ', change.request_user.company.name, 'User: ', change.request_user.username])
     if change.customer_auth==True:
         writer.writerow(['Client Authorized: ', datetime.strftime(change.customer_auth_date, "%m/%d/%Y %H:%M"), 'by: ', change.customer_auth_user.username])
-    elif change.customer_auth!=True and change.customer_auth_date!=None:
+    elif change.customer_auth is True and change.customer_auth_date is None:
         writer.writerow(['Client Denied: ', datetime.strftime(change.customer_auth_date, "%m/%d/%Y %H:%M")])
         writer.writerow(['Reason: ', change.customer_deny_exp])
-    if change.internal_auth==True:
+    if change.internal_auth is True:
         writer.writerow(['Internally Authorized: ', datetime.strftime(change.internal_auth_date, "%m/%d/%Y %H:%M"), 'by: ', change.internal_auth_user.username])
-    elif change.internal_auth!=True and change.internal_auth_date!=None:
+    elif change.internal_auth is True and change.internal_auth_date is None:
         writer.writerow(['Internally Denied: ', datetime.strftime(change.customer_auth_date, "%m/%d/%Y %H:%M")])
         writer.writerow(['Reason: ', change.internal_deny_exp])
-    if change.open==False:
+    if change.open is False:
         writer.writerow(['Close Date: ', datetime.strftime(change.close_date, "%m/%d/%Y"), " by: ", change.close_user.username])
     dataLogger = logging.getLogger("dataLogger")
     dataLogger.info(datetime.today().strftime(
@@ -743,17 +737,18 @@ def export(request, user_id, view_id):
 @login_required()
 def client_accept(request, user_id,view_id):
     user = User.objects.get(pk=user_id)
-    if request.method=="GET":
+    if request.method == "GET":
         view = Change.objects.get(pk=view_id)
         view.customer_auth = True
         view.customer_auth_user = user
         view.customer_auth_date=datetime.today()
         dataLogger = logging.getLogger("dataLogger")
-        dataLogger.info(datetime.today().strftime(
-            "%m/%d/%Y %H:%M")+": "+
-            user.username + " acceptedChange " + view.infra.location.company.name + ": " + view.infra.location.street + ": " + view.title )
+        dataLogger.info(datetime.today().strftime("%m/%d/%Y %H:%M")+": "+
+            user.username + " acceptedChange " + view.infra.location.company.name + ": " +
+                        view.infra.location.street + ": " + view.title )
         view.save()
-    joke = "Client " + str(view.customer_auth_user.username) + " accepted change " + str(view.title) +  " at " + str(view.customer_auth_date.strftime("%m/%d/%Y %H:%M"))
+    joke = "Client " + str(view.customer_auth_user.username) + " accepted change " + str(view.title) +  " at " + \
+           str(view.customer_auth_date.strftime("%m/%d/%Y %H:%M"))
     subject = "Customer Accepted Change " + str(view.title)
     emailNotification(request, subject, joke)
     return HttpResponseRedirect('/dash/' + str(user.id) + '/view/'+str(view_id)+'/?accept')
@@ -768,10 +763,11 @@ def workDone(request, user_id, view_id):
     view.work_done_user=user
     view.save()
     dataLogger = logging.getLogger("dataLogger")
-    dataLogger.info(datetime.today().strftime(
-        "%m/%d/%Y %H:%M") + ": " +
-                    user.username + " workComplete " + view.infra.location.company.name + ": " + view.infra.location.street + ": " + view.title)
-    joke = "Engineer " + str(view.customer_auth_user.username) + " completed work on " + str(view.title) + " at " + str(view.work_date.strftime("%m/%d/%Y %H:%M"))
+    dataLogger.info(datetime.today().strftime("%m/%d/%Y %H:%M") + ": " +
+                    user.username + " workComplete " + view.infra.location.company.name + ": " +
+                    view.infra.location.street + ": " + view.title)
+    joke = "Engineer " + str(view.customer_auth_user.username) + " completed work on " + str(view.title) + \
+           " at " + str(view.work_date.strftime("%m/%d/%Y %H:%M"))
     subject = "Work Complete " + str(view.title)
     emailNotification(request, subject, joke)
     return HttpResponseRedirect('/dash/' + str(user.id) + '/view/'+str(view.id)+'/?work')
@@ -786,11 +782,12 @@ def internal_accept(request, user_id,view_id):
         change.internal_auth_user = user
         change.internal_auth_date=datetime.today()
         dataLogger = logging.getLogger("dataLogger")
-        dataLogger.info(datetime.today().strftime(
-            "%m/%d/%Y %H:%M")+": "+
-                        user.username + " acceptedChange " + change.infra.location.company.name + ": " + change.infra.location.street + ": " + change.title)
+        dataLogger.info(datetime.today().strftime("%m/%d/%Y %H:%M")+": "+
+                        user.username + " acceptedChange " + change.infra.location.company.name + ": " +
+                        change.infra.location.street + ": " + change.title)
         change.save()
-    joke = "Admin " + str(change.internal_auth_user.username) + " accepted change " + str(change.title) +  " at " + str(change.internal_auth_date.strftime("%m/%d/%Y %H:%M"))
+    joke = "Admin " + str(change.internal_auth_user.username) + " accepted change " + str(change.title) +  " at " + \
+           str(change.internal_auth_date.strftime("%m/%d/%Y %H:%M"))
     subject = "Admin Accepted Change " + str(change.title)
     emailNotification(request, subject, joke)
     return HttpResponseRedirect('/dash/'+str(user.id)+'/view/'+str(view_id)+'/?accept')
@@ -798,8 +795,9 @@ def internal_accept(request, user_id,view_id):
 
 @login_required()
 def revert(request, user_id, view_id):
-    user=request.user
-    view=Change.objects.get(pk=view_id)
+    user = User.objects.get(pk=user_id)
+    view = Change.objects.get(pk=view_id)
+
     if user.groups.filter(name='admin').exists():
         view.internal_auth=False
         view.internal_auth_date=None
@@ -818,8 +816,7 @@ def revert(request, user_id, view_id):
 
 @login_required()
 def close(request, user_id,view_id):
-    user=request.user
-    content ={}
+    user = User.objects.get(pk=user_id)
     if request.method=="GET":
         view = Change.objects.get(pk=view_id)
         view.open = False
@@ -873,7 +870,7 @@ def viewClosed(request, user_id):
             content['locs'] = Location.objects.filter(company=user.company)
             content['client'] = 'ya'
             content['company'] = user.company
-    content['closi']="how"
+    content['closi'] = "how"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -947,7 +944,7 @@ def create(request, user_id):
         new.save()
         bet=1
     else:
-        user = request.user
+        pass
     content = {
         'userr': user,
         'user': request.user,
@@ -967,7 +964,7 @@ def create(request, user_id):
 @login_required()
 def delete(request, user_id, view_id):
     content = {}
-    user = request.user
+    user = User.objects.get(pk=user_id)
     if request.method == 'GET':
         view = Change.objects.get(pk=view_id)
         dataLogger = logging.getLogger("dataLogger")
@@ -1065,4 +1062,17 @@ def logExport(request, user_id):
         writer.writerow([logString])
         logString = ""
     return response
+
+
+@login_required()
+def super_admin(request, user_id):
+    user = User.objects.get(pk=user_id)
+    if user.super_admin is True:
+        user.super_admin = False
+    else:
+        user.super_admin = True
+    user.save()
+    return HttpResponseRedirect('/dash/' + str(user.id) + '/view/')
+
+
 

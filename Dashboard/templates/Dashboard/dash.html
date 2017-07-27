@@ -48,29 +48,28 @@
 
 
 {% if userr.id == user.id %}
+    <div class="center-block" style="padding-top: 100px">
+        <div class="container">
 
-<div class="center-block" style="padding-top: 100px">
-    <div class="container">
-
-        <ul style="margin-right: 4px" class="nav nav-tabs nav-justified">
-            {% for t in tabs %}
-                <li style="margin-right: 60px;" {% if t.id == tab.id %}class="active"{% endif %}>
-                    <a href="/dash/{{ user.id }}/{{ t.url }}">{{ t.name }}</a>
-                </li>
-            {% endfor %}
-        </ul>
+            <ul style="margin-right: 4px" class="nav nav-tabs nav-justified">
+                {% for t in tabs %}
+                    <li style="margin-right: 60px;" {% if t.id == tab.id %}class="active"{% endif %}>
+                        <a href="/dash/{{ user.id }}/{{ t.url }}">{{ t.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <br>
+        <div class="container">
+            {% include tab.template %}
+        </div>
     </div>
-    <br>
-    <div class="container">
-        {% include tab.template %}
-    </div>
-</div>
 {% else %}
     <br><br><br><br>
-    <div class="alert alert-danger"
-             style="max-width: 800px; text-align: center; margin-left: auto; margin-right: auto;">YOU DO NOT HAVE ACCESS TO THIS PAGE!</div>
-    <script>setTimeout(function(){window.location.href="/dash/{{ user.id }}/"},3000);</script>
 
+    <div class="alert alert-danger"
+             style="max-width: 800px; text-align: center; margin-left: auto; margin-right: auto;">You do not have access to this page! <br> You are being redirected</div>
+    <script>setTimeout(function(){window.location.href="/dash/{{ user.id }}/"},2000);</script>
 {% endif %}
 
 <br>
@@ -81,7 +80,7 @@
 <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation"
      style="background-color: #5691ef;">
     <div class="navbar-brand" style="color: black" href="/">Pervasive Solutions 2017</div>
-
+    <a href = "/dash/{{ user.id }}/super_admin/" style="margin-right:5px; margin-top: 9px;" class = "btn btn-warning pull-right">Super Admin</a>
 </nav>
 </body>
 </html>

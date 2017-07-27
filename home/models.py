@@ -29,10 +29,11 @@ class User(AbstractUser):
     fName = models.CharField(max_length=30)
     lName = models.CharField(max_length=30)
     company = models.ForeignKey(Company)
+    super_admin = models.BooleanField(default=False)
+
 
     def create_admin(self, user):
         user.groups.add(Group.objects.get(name='admin'))
-
         user.save()
 
     def create_engineer(self, user):

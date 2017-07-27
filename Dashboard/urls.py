@@ -33,5 +33,6 @@ urlpatterns = [
     url(r'^new_os/', views.newOS, name='newOs'),
     url(r'^calendar/', views.calendar, name='calendar'),
     url(r'^choose/', views.choose, name='choose'),
+    url(r'^super_admin/', views.super_admin, name='super_admin'),
     url(r'^$', RedirectView.as_view(url='choose/')),
 ]
