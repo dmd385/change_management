@@ -1,0 +1,72 @@
+{% load static from staticfiles %}
+<link rel='stylesheet' href="{% static 'fullcalendar-3.4.0/fullcalendar.min.css' %}"/>
+<script type="text/javascript" src="{% static 'lib/moment.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'fullcalendar-3.4.0/fullcalendar.min.js' %}"></script>
+<style>
+    .fc-slats .fc-widget-content:last-child {
+        cursor: pointer;
+    }
+
+    .fc-event {
+        font-size: .62em;
+    }
+
+    .fc-slats .fc-widget-content:last-child:hover {
+    //background-color: #EEEEEE;
+    }
+</style>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#calendar').fullCalendar({
+            timezone: 'local',
+
+            allDayDefault: false,
+            allDaySlot: false,
+            height: "auto",
+            events: [
+                {% for i in dates %}
+                    {
+                        title: '{{ i.infra.location.company.name }}: {{ i.title}}',
+                        start: '{{ i.work_date|date:"c" }}',
+
+                        url: '/dash/{{ user.id }}/view/{{ i.pk }}/',
+                    {% if i.open == False %}
+                        color: "#FFD700",
+                    {% elif i.work_done == True %}
+                        color: "#800080",
+                    {% elif i.internal_auth == True and i.customer_auth == True %}
+                        color: "#32CD32",
+                    {% elif i.internal_auth == False and i.internal_auth_date != null %}
+                        color: "#FF4500",
+                     {% elif i.customer_auth == False and i.customer_auth_date != null %}
+                        color: "#FF4500",
+                    {% else %}
+                        color: "#1E90FF"
+                    {% endif %}
+                    },
+                {% endfor %}
+            ],
+
+        });
+        $('.fc-widget-content').hover(function() {
+            if(!$(this).html()) {
+                for (i = 0; i < 7; i++) {
+                    $(this).append('<td class="temp_cell" style="border: 0px; width:' + (Number($('.fc-day').width()) + 2) + 'px"></td>');
+                }
+
+                $(this).children('td').each(function() {
+                    $(this).hover(function() {
+                        $(this).css({'background-color': '#CCCCCC', 'opacity': '.5'});
+                    }, function() {
+                        $(this).prop('style').removeProperty('background-color');
+                    });
+                });
+            }
+        }, function() {
+            $(this).children('.temp_cell').remove();
+        });
+    });
+</script>
+<div class="container">
+    <div id="calendar"></div>
+</div>

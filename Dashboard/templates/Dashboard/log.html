@@ -1,0 +1,82 @@
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'datetimepicker/jquery.datetimepicker.min.css' %}"/>
+<script src="{% static 'datetimepicker/jquery.datetimepicker.full.min.js' %}"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#starttime').datetimepicker({
+            format:'m/d/Y H:i'
+        });
+        $('#endtime').datetimepicker({
+            format:'m/d/Y H:i'
+        });
+
+        $('#filter-form').ajaxForm();
+        $('#filter-form').submit(function filter() {
+            $(this).ajaxSubmit({
+                datatType: "text",
+                success: function (data, textStatus, jqXHR) {
+                    $('#logbox').html(data)
+                }
+            });
+            return false
+        });
+    });
+</script>
+<div class="content">
+    <pre id="logbox" style="height: 256px;">Please select filters to view log.
+    </pre>
+    <form id="filter-form" action="/dash/{{ user.id }}/log/" method="post">
+        {% csrf_token %}
+
+        <label style="font-size: small" for="starttime">Start of timeframe:</label>
+        <div class="form-group">
+            <input id="starttime" type="text" value="{{ starttime }}" style="max-width: 225px; margin-left: 0px;"
+                   required
+                   class="form-control" id= "start" name="start" placeholder="start time">
+        </div>
+
+        <label style="font-size: small" for="endtime">End of timeframe:</label>
+        <div class="form-group">
+            <input id="endtime" type="text" value="{{ endtime }}" style="max-width: 225px; margin-left: 0px;" required
+                   class="form-control" name="end" placeholder="end time">
+        </div>
+        <label style="font-size: small" for="type">Event type:</label>
+        <select id="type" style="max-width: 225px; margin-left: 0px;" class="form-control" name="type">
+            <option value="" selected>ALL</option>
+            <option value="createdUser">New User</option>
+            <option value="editedUser">Edit User</option>
+            <option value="deletedUser">Delete User</option>
+            <option value="createdCompany">New Company</option>
+            <option value="createdLocation">New Location</option>
+            <option value="editedLocation">Edit Location</option>
+            <option value="deletedLocation">Delete Location</option>
+            <option value="createdOS">New OS</option>
+            <option value="createdType">New Infrastructure Type</option>
+            <option value="createdInfrastructure">New Infrastructure</option>
+            <option value="editedInfrastructure">Edit Infrastructure</option>
+            <option value="deletedInfrastructure">Delete Infrastructure</option>
+            <option value="createdChange">Create Change</option>
+            <option value="editedChange">Edit Change</option>
+            <option value="acceptedChange">Approve Change</option>
+            <option value="deniedChange">Deny Change</option>
+            <option value="deleteChange">Delete Change</option>
+            <option value="exportedChange">Export info</option>
+
+        </select>
+
+        <label style="font-size: small" for="user">User:</label>
+        <select id="user" style="max-width: 225px; margin-left: 0px;" class="form-control" name="user">
+            <option value="" selected>ALL</option>
+            {% for u in users %}
+                <option id={{ u.username }} value={{ u.username }}>{{ u.username }}</option>
+            {% endfor %}
+        </select>
+
+        <br>
+    <a href="/dash/{{ user.id }}/log/export/" class="btn btn-warning">Export</a>
+    <input class="btn btn-success" type="submit" name = "export" value="Edit"/>
+        <input class="btn btn-success" type="submit" name = "filter" value="Filter"/>
+    </form>
+</div>

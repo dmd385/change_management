@@ -1,0 +1,162 @@
+<script>
+    function typeSelected() {
+        selection = $('select[name=type]').val();
+        if (selection == "Nurse") {
+            $('#select-doctor').css('display', 'block');
+            $('#select-hospital').css('display', 'none');
+        } else {
+            $('#select-doctor').css('display', 'none');
+            $('#select-hospital').css('display', 'block');
+        }
+    }
+</script>
+<div class="container">
+{% if message %}
+        <div class="alert alert-danger"
+             style="max-width: 800px; margin-left: auto; margin-right: auto;">{{ message }}</div>
+{% endif %}
+{% if good %}
+        <div class="alert alert-success"
+             style="max-width: 800px; margin-left: auto; margin-right: auto;">{{ good }}</div>
+{% endif %}
+<div class="row">
+<div class="pull-left">
+{% if edit %}
+    <form action="/dash/{{ user.id }}/edit_user/{{ id }}/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" readonly for="fName">User Name:</label>
+    <div class="form-group">
+        <input readonly type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="username"
+               value="{{ username }}" required>
+    </div>
+    <label style="font-size: small" for="fName">Password:</label>
+    <div class="form-group">
+        <input readonly type="password" style="max-width: 225px; margin-left: 0px;" class="form-control" name="password"
+               value="**************">
+    </div>
+    <label style="font-size: small" for="fName">First Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="fName"
+               value="{{ fName }}" required>
+    </div>
+    <label style="font-size: small" for="fName">Last Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="lName"
+               value="{{ lName }}" required>
+    </div>
+    <label style="font-size: small" for="fName">E-mail:</label>
+    <div class="form-group">
+        <input type="email" style="max-width: 225px; margin-left: 0px;" class="form-control" name="email"
+               value="{{ email }}" required>
+    </div>
+    <label style="font-size: small" for="fName">Type:</label>
+    <select readonly style="max-width: 225px; margin-left: 0px;" class="form-control" name="type" onchange="typeSelected();">
+        <!--<option id="mine" selected>Admin</option>-->
+        {% if group == "Administrator" %}
+            <option selected id="mine1">Administrator</option>
+            {% else %}
+            <option id="mine1">Administrator</option>
+            {% endif %}
+        {% if group == 'Engineer' %}
+            <option id="mine2" selected>Engineer</option>
+            {% else %}
+        <option id="mine2">Engineer</option>
+            {% endif %}
+    {% if group == "Client" %}
+        <option id="mine3" selected>Client</option>
+        {% else %}
+        <option id="mine3" >Client</option>
+    {% endif %}
+    </select>
+    <label style="font-size: small" for="fName">Company:</label>
+    <select readonly  style="max-width: 225px; margin-left: 0px;" class="form-control" name="company">
+        {% for comp in company %}
+            {% if comp == companyy %}
+                <option id= {{ comp.name }} selected>{{ comp.name }}</option>
+            {% endif %}
+            <option id= {{ comp.name }}>{{ comp.name }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <a href="/dash/{{ user.id }}/new_user/" class="btn btn-danger">Cancel</a>
+    <a href="password_reset" class="btn btn-warning">Reset Password</a>
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Edit">
+</form>
+{% else %}
+<form action="/dash/{{ user.id }}/new_user/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" for="fName">User Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="username"
+               placeholder="User Name" required>
+    </div>
+    <label style="font-size: small" for="fName">Password:</label>
+    <div class="form-group">
+        <input type="password" style="max-width: 225px; margin-left: 0px;" class="form-control" name="password"
+               placeholder="Password" required>
+    </div>
+    <label style="font-size: small" for="fName">First Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="fName"
+               placeholder="First Name" required>
+    </div>
+    <label style="font-size: small" for="fName">Last Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="lName"
+               placeholder="Last Name" required>
+    </div>
+    <label style="font-size: small" for="fName">E-mail:</label>
+    <div class="form-group">
+        <input type="email" style="max-width: 225px; margin-left: 0px;" class="form-control" name="email"
+               placeholder="Email" required>
+    </div>
+    <label style="font-size: small" for="fName">Type:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" name="type" onchange="typeSelected();" required>
+        <!--<option id="mine" selected>Admin</option>-->
+        <option id="mine1">Administrator</option>
+        <option id="mine2">Engineer</option>
+        <option id="mine3">Client</option>
+    </select>
+    <label style="font-size: small" for="fName">Company:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" name="company" required>
+        {% for comp in company %}
+            <option id= {{ comp.name }}>{{ comp.name }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Create">
+</form>
+{% endif %}
+</div>
+
+<div class="pull-6" >
+<div class="container">
+    <div class="jumbotron jumbotron-fluid" style="margin-left: 200px;">
+  <table class="table table-striped" style="max-width: 900px;">
+
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Name</th>
+          <th>Email</th>
+        <th>Company</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for use in userz %}
+            <tr>
+                <td><a href="/dash/{{ user.id }}/edit_user/{{ use.id }}">{{ use.username }}</a></td>
+                <td>{{ use.fName }} {{ use.lName }}</td>
+                <td>{{ use.email }}</td>
+                <td>{{ use.company.name }}</td>
+            </tr>
+        {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+</div>
+</div>
+</div>
+</div>

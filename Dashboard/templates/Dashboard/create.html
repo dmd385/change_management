@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+
+    {% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'datetimepicker/jquery.datetimepicker.min.css' %}"/>
+<script src="{% static 'datetimepicker/jquery.datetimepicker.full.min.js' %}"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#company").change(function(){
+            function removeOptions(selectbox)
+            {
+                var i;
+                for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
+                {
+                    selectbox.remove(i);
+                }
+            }
+            //using the function:
+            removeOptions(document.getElementById("location"));
+            {% for loc in locs %}
+            var doc = document.getElementById("company");
+            var locChoice = doc.options[doc.selectedIndex].text;
+            if  ("{{ loc.company.name }}"== locChoice){
+                $('#location').append('<option>{{ loc.street }}</option>')
+            }
+        {% endfor %}
+        removeOptions(document.getElementById("infra"));
+        {% for inf in infra %}
+            var doc = document.getElementById("location");
+            var locChoice = doc.options[doc.selectedIndex].text;
+            if  ("{{ inf.location.street }}"== locChoice){
+                $('#infra').append('<option id= {{ inf.id }}>{{ inf.name }}</b>: {{ inf.type.name }}</option>')
+            }
+        {% endfor %}
+        removeOptions(document.getElementById("request_user"));
+        {% for user in users %}
+            var doc = document.getElementById("company");
+            var locChoice = doc.options[doc.selectedIndex].text;
+            if  ("{{ user.company.name }}"== locChoice){
+                $('#request_user').append('<option id= {{ user.username }}>{{ user.company.name }}: {{ user.username }}</option>')
+            }
+        {% endfor %}
+        });
+
+        $("#location").change(function(){
+            function removeOptions(selectbox)
+            {
+                var i;
+                for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
+                {
+                    selectbox.remove(i);
+                }
+            }
+            //using the function:
+            removeOptions(document.getElementById("infra"));
+
+            {% for inf in infra %}
+            var doc = document.getElementById("location");
+            var locChoice = doc.options[doc.selectedIndex].text;
+            if  ("{{ inf.location.street }}"== locChoice){
+                $('#infra').append('<option id= {{ inf.id }}>{{ inf.name }}</b>: {{ inf.type.name }}</option>')
+            }
+        {% endfor %}
+        });
+
+
+        $('#complete_date').datetimepicker({
+            format:'m/d/Y H:i'
+        });
+        $('#request_date').datetimepicker({
+            format:'m/d/Y'
+        });
+
+        {% for loc in locs %}
+            var doc = document.getElementById("company");
+            var locChoice = doc.options[doc.selectedIndex].text;
+            if  ("{{ loc.company.name }}" == locChoice){
+                $('#location').append('<option>{{ loc.street }}</option>')
+            }
+        {% endfor %}
+
+        {% for inf in infra %}
+            var doc = document.getElementById("location");
+            var locChoice = doc.options[doc.selectedIndex].text;
+            if  ("{{ inf.location.street }}"== locChoice){
+                $('#infra').append('<option id= {{ inf.id }}>{{ inf.name }}</b>: {{ inf.type.name }}</option>')
+            }
+        {% endfor %}
+
+        {% for user in users %}
+            var doc = document.getElementById("company");
+            var locChoice = doc.options[doc.selectedIndex].text;
+            if  ("{{ user.company.name }}"== locChoice){
+                $('#request_user').append('<option id= {{ user.username }}>{{ user.company.name }}: {{ user.username }}</option>')
+            }
+        {% endfor %}
+
+    });
+</script>
+</head>
+<body>
+{% if message %}
+        <div class="alert alert-danger"
+             style="max-width: 800px; margin-left: auto; margin-right: auto;">{{ message }}</div>
+{% endif %}
+{% if good %}
+        <div class="alert alert-success"
+             style="max-width: 800px; margin-left: auto; margin-right: auto;">{{ good }}</div>
+{% endif %}
+<div class="pre-scrollable" style="padding-left: 200px; max-height: 650px;">
+<form action="/dash/{{ user.id }}/create/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" for="fName">Company:</label>
+    <select required style="max-width: 650px; margin-left: 0px;" class="form-control" id = "company" name="company">
+        {% for comp in companies %}
+            <option id= {{ comp.id }}>{{ comp.name }}</option>
+        {% endfor %}
+    </select>
+<label style="font-size: small" for="fName">Location:</label>
+    <select required style="max-width: 650px; margin-left: 0px;" class="form-control" id="location" name="location">
+
+    </select>
+<label style="font-size: small" for="fName">Infrastructure:</label>
+    <select required style="max-width: 650px; margin-left: 0px;" class="form-control" id="infra" name="infra">
+
+    </select>
+    <label style="font-size: small; min-width: 500px;" for="fName">Title:</label>
+    <input required type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               placeholder="Title">
+    <div class="form-group">
+        <label style="font-size: small" for="comment">Description:</label>
+        <textarea required class="form-control"  style="max-width: 650px" rows="5" name="description"></textarea>
+    </div>
+    <div class="form-group">
+        <label style="font-size: small" for="comment">Negative Impact:</label>
+        <textarea required class="form-control"  style="max-width: 650px" rows="5" name="neg"></textarea>
+    </div>
+    <div class="form-group">
+        <label style="font-size: small" for="comment">Justification:</label>
+        <textarea required class="form-control"  style="max-width: 650px" rows="5" name="justification"></textarea>
+    </div>
+    <label style="font-size: small" for="fName">Request Date:</label>
+    <input required class="form-control" style="max-width: 650px;" id="request_date" name="request_date" placeholder="MM/DD/YYY" type="text"/>
+<label style="font-size: small; min-width: 500px;" for="fName">Estimated time:</label>
+    <input required type="number" style="max-width: 650px; margin-left: 0px;" class="form-control" name="est_time"
+               placeholder="Estimated Time">
+    <label style="font-size: small" for="fName">Complete Date:</label>
+
+    <input required class="form-control" style="max-width: 650px;" id="complete_date" name="work_date" placeholder="MM/DD/YYY" type="text"/>
+    <label style="font-size: small" for="fName">Request User:</label>
+    <select required style="max-width: 650px; margin-left: 0px;" class="form-control" id = "request_user" name="request_user">
+
+    </select>
+    <label style="font-size: small" for="fName">Project Manager:</label>
+    <select required style="max-width: 650px; margin-left: 0px;" class="form-control" name="project_user">
+        {% for usr in cusers %}
+            <option id= {{ usr.username }}>{{ usr.company.name }}: {{ usr.username }}</option>
+        {% endfor %}
+    </select>
+    <label style="font-size: small" for="fName">Engineer:</label>
+    <select required style="max-width: 650px; margin-left: 0px;" class="form-control" name="engineer">
+        {% for usr in cusers %}
+            <option id= {{ usr.username }}>{{ usr.company.name }}: {{ usr.username }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <a href="" id="cancel" name="cancel" class="btn btn-danger">Cancel</a>
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Create">
+</form>
+</div>
+
+</body>
+</html>

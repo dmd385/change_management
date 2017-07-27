@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Infrastructure</title>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $("#company").change(function () {
+            function removeOptions(selectbox) {
+                var i;
+                for (i = selectbox.options.length - 1; i >= 0; i--) {
+                    selectbox.remove(i);
+                }
+            }
+
+            //using the function:
+            removeOptions(document.getElementById("location"));
+            {% for loc in locs %}
+                var doc = document.getElementById("company");
+                var locChoice = doc.options[doc.selectedIndex].text;
+                if ("{{ loc.company.name }}" == locChoice) {
+                    $('#location').append('<option>{{ loc.street }}</option>')
+                }
+            {% endfor %}
+        });
+
+        {% for loc in locs %}
+                var doc = document.getElementById("company");
+                var locChoice = doc.options[doc.selectedIndex].text;
+                if ("{{ loc.company.name }}" == locChoice) {
+                    $('#location').append('<option>{{ loc.street }}</option>')
+                }
+        {% endfor %}
+
+    });
+    </script>
+</head>
+<body>
+{% if message %}
+        <div class="alert alert-danger"
+             style="max-width: 800px; margin-left: auto; margin-right: auto;">{{ message }}</div>
+{% endif %}
+{% if good %}
+        <div class="alert alert-success"
+             style="max-width: 800px; margin-left: auto; margin-right: auto;">{{ good }}</div>
+{% endif %}
+<div class="pull-left">
+<form action="/dash/{{ user.id }}/new_os/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" for="fName">New OS:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="os"
+               placeholder="Operating System" required>
+    </div>
+
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Create">
+</form>
+<form action="/dash/{{ user.id }}/new_inftype/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" for="fName">New Infrastructure Title:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="inf_type"
+               placeholder="Infrastructure Title" required>
+    </div>
+
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Create">
+</form>
+{% if edit %}
+    <form action="/dash/{{ user.id }}/edit_infra/{{ id }}/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" for="fName">Infrastructure Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="name"
+               value="{{ name }}" required>
+    </div>
+    <label style="font-size: small" for="fName">Infrastructure Type:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" name="type" required>
+
+            <option id= {{ type.name }}>{{ type.name }}</option>
+
+    </select>
+    <label style="font-size: small;max-width: 225px; margin-left: 0px;" for="fName">OS:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" name="os" required>
+        {% for os in oss %}
+            {% if os == osi %}
+                <option selected id= {{ os.name }}>{{ os.name }}</option>
+            {% else %}
+            <option id= {{ os.name }}>{{ os.name }}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+    <label style="font-size: small" for="fName">Location:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" id = "location2" name="location" required>
+        {% for loc in locs %}
+            {% if loc == location %}
+                <option selected id= {{ loc.id }}>{{ loc.company.name }}: {{ loc.street }}</option>
+                {% else %}
+                <option id= {{ loc.id }}>{{ loc.company.name }}: {{ loc.street }}</option>
+            {% endif %}
+
+        {% endfor %}
+    </select>
+<br>
+    <a href="/dash/{{ user.id }}/edit_infra/{{ id }}/delete/" class="btn btn-danger">Delete</a>
+    <a href="/dash/{{ user.id }}/new_infra/" class="btn btn-warning">Cancel</a>
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Edit">
+</form>
+{% else %}
+<form action="/dash/{{ user.id }}/new_infra/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small;max-width: 225px; margin-left: 0px;" for="fName">Infrastructure Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="name"
+               placeholder="Infrastructure Name" required>
+    </div>
+    <label style="font-size: small;max-width: 225px; margin-left: 0px;" for="fName">Infrastructure Type:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" name="type">
+        {% for inft in infts %}
+            <option id= {{ inft.name }}>{{ inft.name }}</option>
+        {% endfor %}
+    </select>
+    <label style="font-size: small;max-width: 225px; margin-left: 0px;" for="fName">OS:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" name="os">
+        {% for os in oss %}
+            <option id= {{ os.name }}>{{ os.name }}</option>
+        {% endfor %}
+    </select>
+    <label style="font-size: small" for="fName">Company:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" id = "company" name="company">
+        {% for comp in company %}
+            <option id= {{ comp.id }}>{{ comp.name }}</option>
+        {% endfor %}
+    </select>
+    <label style="font-size: small" for="fName">Location:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" id="location" name="location">
+
+    </select>
+<br>
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Create">
+</form>
+{% endif %}
+</div>
+<div class="pull-3" >
+<div class="container">
+<div class="jumbotron" style="margin-left: 220px">
+  <table class="table table-striped" style="max-width: 900px;">
+
+    <thead>
+      <tr>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Location</th>
+          <th>Type</th>
+          <th>OS</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for inf in infs %}
+            <tr>
+                <td><a href="/dash/{{ user.id }}/edit_infra/{{ inf.id }}/"> {{ inf.name }}</a></td>
+                <td>{{ inf.location.company.name }}</td>
+                <td>{{ inf.location.street }}</td>
+                <td>{{ inf.type.name }}</td>
+                <td>{{ inf.os.name }}</td>
+            </tr>
+        {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+</div>
+</div>
+</body>
+</html>

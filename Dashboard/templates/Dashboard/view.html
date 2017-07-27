@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <title>View Changes</title>
+      {% load static from staticfiles %}
+      <link rel="stylesheet" type="text/css" href="{% static 'datetimepicker/jquery.datetimepicker.min.css' %}"/>
+      <script src="{% static 'datetimepicker/jquery.datetimepicker.full.min.js' %}"></script>
+      <script src="http://malsup.github.com/jquery.form.js"></script>
+      <script type="text/javascript">
+         $(document).ready(function () {
+             $('#complete_date').datetimepicker({
+                 format:'m/d/Y H:i'
+             });
+             $('#request_date').datetimepicker({
+                 format:'m/d/Y'
+             });
+
+             $('#filter-form').ajaxForm();
+             $('#filter-form').submit(function filter() {
+                 $(this).ajaxSubmit({
+                     datatType: "text",
+                     success: function (data, textStatus, jqXHR) {
+                         $('#logbox').html(data)
+                     }
+                 });
+                 return false
+             });
+
+             $("#company").change(function () {
+            function removeOptions(selectbox) {
+                var i;
+                for (i = selectbox.options.length - 1; i >= 0; i--) {
+                    selectbox.remove(i);
+                }
+            }
+
+            //using the function:
+            removeOptions(document.getElementById("location"));
+            {% for loc in locs %}
+                var doc = document.getElementById("company");
+                var locChoice = doc.options[doc.selectedIndex].text;
+                if ("{{ loc.company.name }}" == locChoice) {
+                    $('#location').append('<option>{{ loc.street }}</option>')
+                }
+            {% endfor %}
+        });
+
+        {% for loc in locs %}
+                var doc = document.getElementById("company");
+                var locChoice = doc.options[doc.selectedIndex].text;
+                if ("{{ loc.company.name }}" == locChoice) {
+                    $('#location').append('<option>{{ loc.street }}</option>')
+                }
+        {% endfor %}
+         });
+      </script>
+   </head>
+   <body>
+      {% if message %}
+      <div class="alert alert-danger"
+         style="max-width: 800px; margin-left: auto; margin-right: auto;">{{ message }}</div>
+      {% endif %}
+
+      {% if good %}
+      <div class="alert alert-success"
+         style="max-width: 800px; margin-left: auto; margin-right: auto;">{{ good }}</div>
+      {% endif %}
+      {% if workie %}
+      {% endif %}
+      {% if change %}
+      <div class="alert alert-warning"
+         style="max-width: 800px; margin-left: auto; margin-right: auto;">Closed Change Request</div>
+      {% endif %}
+      {% if view %}
+      <div class="pre-scrollable" style="padding-left: 200px; max-height: 650px;">
+         <form action="/dash/{{ user.id }}/view/{{ id }}/" method="post">
+            {% csrf_token %}
+            {% if oh %}
+            <a href="/dash/{{ user.id }}/view_closed/" id="cancel" name="cancel" class="btn btn-primary" >Back</a>
+            {% else %}
+            <a href="/dash/{{ user.id }}/view/" id="cancel" name="cancel" class="btn btn-primary" >Back</a>
+            {% endif %}<br>
+            <label style="font-size: small" for="fName">Infrastructure:</label>
+            {% if admin %}
+            <select style="max-width: 650px; margin-left: 0px;" class="form-control" name="infra">
+               <option id= {{ inf.id }}>{{ infra.location.company.name }}: {{ infra.location.street }}: <b>{{ infra.name }}</b>: {{ infra.type.name }}</option>
+            </select>
+            {% else %}
+            <select  readonly style="max-width: 650px; margin-left: 0px;" class="form-control" name="infra">
+               <option id= {{ inf.id }}>{{ infra.location.company.name }}: {{ infra.location.street }}: <b>{{ infra.name }}</b>: {{ infra.type.name }}</option>
+            </select>
+            {% endif %}
+            <label style="font-size: small; min-width: 500px;" for="fName">Title:</label>
+            <input readonly type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               value = "{{ titlee }}">
+            <div class="form-group">
+               <label style="font-size: small" for="comment">Description:</label>
+               {% if admin or holy%}
+               <textarea required class="form-control"  style="max-width: 650px" rows="5" name="description" >{{ desc }}</textarea>
+               {% else %}
+               <textarea readonly class="form-control"  style="max-width: 650px" rows="5" name="description" >{{ desc }}</textarea>
+               {% endif %}
+            </div>
+            <div class="form-group">
+               <label style="font-size: small" for="comment">Negative Impact:</label>
+               {% if admin or holy%}
+               <textarea required class="form-control"  style="max-width: 650px" rows="5" name="neg">{{ neg }}</textarea>
+               {% else %}
+               <textarea readonly class="form-control"  style="max-width: 650px" rows="5" name="neg">{{ neg }}</textarea>
+               {% endif %}
+            </div>
+            <div class="form-group">
+               <label style="font-size: small" for="comment">Justification:</label>
+               {% if admin or holy%}
+               <textarea required class="form-control"  style="max-width: 650px" rows="5" name="justification">{{ just }}</textarea>
+               {% else %}
+               <textarea readonly class="form-control"  style="max-width: 650px" rows="5" name="justification">{{ just }}</textarea>
+               {% endif %}
+            </div>
+            <label style="font-size: small" for="fName">Request Date:</label>
+            {% if admin or holy%}
+            <input required class="form-control" style="max-width: 650px;" id="request_date" name="request_date" value={{ request }} type="text"/>
+                <label style="font-size: small" for="fName">Estimated Time: (hrs)</label>
+                <input class="form-control" style="max-width: 650px;" id="est_time" name="est_time" value="{{ est_time }}" readonly type="number"/>
+            {% else %}
+            <input readonly class="form-control" style="max-width: 650px;" id="request_date" name="request_date" value={{ request }} type="text"/>
+                <label style="font-size: small" for="fName">Estimated Time: (hrs)</label>
+                <input type="number" readonly class="form-control" style="max-width: 650px;" id="est_time" name="est_time" value={{ est_time }} />
+            {% endif %}
+            <label style="font-size: small" for="fName">Complete Date:</label>
+            {% if admin or holy%}
+            <input required class="form-control" style="max-width: 650px;" id="complete_date" name="work_date" value="{{ work }}" type="text"/>
+                <label style="font-size: small" for="fName">Actual Time: (hrs)</label>
+                <input class="form-control" style="max-width: 650px;" id="act_time" name="act_time" value="{{ act_time }}" type="number"/>
+            {% else %}
+            <input readonly class="form-control" style="max-width: 650px;" id="complete_date" name="work_date" value="{{ work }}" type="text"/>
+                <label style="font-size: small" for="fName">Actual Time: (hrs)</label>
+                <input readonly class="form-control" style="max-width: 650px;" id="act_time" name="act_time" value="{{ act_time }}" type="number"/>
+            {% endif %}
+            <label style="font-size: small" for="fName">Request User:</label>
+            {% if admin %}
+            <select readonly required style="max-width: 650px; margin-left: 0px;" class="form-control" name="request_user">
+               {% for usr in users %}
+               {% if usr.username == requestU.username %}
+               <option id= {{ usr.username }} selected>{{ usr.company.name }}: {{ usr.username}}</option>
+               {% else %}
+
+               {% endif %}
+               {% endfor %}
+            </select>
+            {% else %}
+            <select readonly style="max-width: 650px; margin-left: 0px;" class="form-control" name="request_user">
+               {% for usr in users %}
+               {% if usr.username == requestU.username %}
+               <option id= {{ usr.username }} selected>{{ usr.company.name }}: {{ usr.username}}</option>
+               {% else %}
+
+               {% endif %}
+               {% endfor %}
+            </select>
+            {% endif %}
+            <label style="font-size: small" for="fName">Project Manager:</label>
+            {% if admin %}
+            <select required style="max-width: 650px; margin-left: 0px;" class="form-control" name="project_user">
+               {% for usr in users %}
+               {% if usr.username == project.username %}
+               <option id= {{ usr.username }} selected>{{ usr.company.name }}: {{ usr.username}}</option>
+               {% elif usr.company.name == "Pervasive Solutions" %}
+               <option id= {{ usr.username }} >{{ usr.company.name }}: {{ usr.username}}</option>
+               {% endif %}
+               {% endfor %}
+            </select>
+            {% else %}
+            <select readonly style="max-width: 650px; margin-left: 0px;" class="form-control" name="project_user">
+               {% for usr in users %}
+               {% if usr.username == project.username %}
+               <option id= {{ usr.username }} selected>{{ usr.company.name }}: {{ usr.username}}</option>
+               {% else %}
+
+               {% endif %}
+               {% endfor %}
+            </select>
+            {% endif %}
+            <label style="font-size: small" for="fName">Engineer:</label>
+            {% if admin %}
+            <select required style="max-width: 650px; margin-left: 0px;" class="form-control" name="engineer">
+               {% for usr in users %}
+               {% if usr.username == engineer.username %}
+               <option id= {{ usr.username }} selected>{{ usr.company.name }}: {{ usr.username}}</option>
+               {% elif usr.company.name == "Pervasive Solutions" %}
+               <option id= {{ usr.username }} >{{ usr.company.name }}: {{ usr.username}}</option>
+               {% endif %}
+               {% endfor %}
+            </select>
+            {% else %}
+            <select readonly style="max-width: 650px; margin-left: 0px;" class="form-control" name="engineer">
+               {% for usr in users %}
+               {% if usr.username == engineer.username %}
+               <option id= {{ usr.username }} selected>{{ usr.company.name }}: {{ usr.username}}</option>
+               {% else %}
+
+               {% endif %}
+               {% endfor %}
+            </select>
+            {% endif %}
+            <label style="font-size: small; min-width: 500px;" for="fName">Customer accept:</label>
+            {% if cust_date and denied%}
+            <input type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               readonly value = "{{ customer_accept }}: {{ cust_date }} by: {{ cust_user }}">
+            <label style="font-size: small" for="fName">Reason:</label>
+            <textarea readonly class="form-control"  style="max-width: 650px;" rows="3" name="deny" >{{ cust_deny }}</textarea>
+                {% elif cust_date %}
+                <input type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               readonly value = "{{ customer_accept }}: {{ cust_date }} by: {{ cust_user }}">
+            {% else %}
+            <input type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               readonly value = {{ customer_accept }}>
+            {% endif %}
+            <label style="font-size: small; min-width: 500px;" for="fName">Internal accept:</label>
+            {% if int_date and idenied %}
+            <input type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               readonly value = "{{ internal_accept }}: {{ int_date }} by: {{ int_user }}">
+            <label style="font-size: small" for="fName">Reason:</label>
+            <textarea readonly class="form-control"   style="max-width: 650px;" rows="3" name="deny" >{{ int_deny }}</textarea>
+                {% elif int_date %}
+                <input type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               readonly value = "{{ internal_accept }}: {{ int_date }} by: {{ int_user }}">
+            {% else %}
+            <input type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               readonly value = {{ internal_accept }}>
+            {% endif %}
+
+         {% if w_done %}
+             <label style="font-size: small; min-width: 500px;" for="fName">Work Complete:</label>
+            <input type="text" style="max-width: 650px; margin-left: 0px;" class="form-control" name="title"
+               readonly value = "True: {{ w_date }} by {{ w_user }}">
+             <br>
+             {% else %}
+             {% endif %}
+
+            {% if oh %}
+            <label style="font-size: small" for="fName">Close Date: (by: {{ closeU }})</label>
+            <input readonly class="form-control" style="max-width: 650px;" id="close_date" name="close_date" value={{ close }} type="text"/>
+            <br>
+
+            {% else %}
+
+            {% if admin %}
+            {% if internal_deny%}
+                <label style="font-size: small" for="fName">Reason for Denial:</label>
+            <textarea class="form-control"  placeholder="Required" style="max-width: 650px;" rows="3" name="denyyy" ></textarea>
+            <br>
+            <input style="margin-left: 0px" class="btn  btn-danger " type="submit" value="Deny">
+            {% endif %}
+
+            {% if internal_accept %}
+            {% else %}
+                {% if int_date %}
+                    {% else %}
+
+            <a href="internal_approve/" id="i_approve" name="i_approve" class="btn btn-success">Approve</a>
+                    <br>
+                    <br>
+            <a href="delete/" id="delete" name="delete" class="btn btn-danger">Delete</a>
+            <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Edit">
+                    {% endif %}
+            {% endif %}
+
+                {% if internal_accept  %}
+                    {% elif int_date and internal_deny %}
+                    {% else %}
+                    <br>
+
+
+
+                    {% endif %}
+            {% elif holy %}
+                {% if w_done %}
+                    {% else %}
+                    <br>
+
+
+                    {% if int_date and cust_date %}
+                        <a href="work_complete/" id="work_complete" name="work_complete" class="btn btn-success">Work Complete</a>
+                        {% else %}
+                <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Edit">
+                        {% endif %}
+                    <br>
+                    {% endif %}
+            {% else %}
+
+            {% if cust_date %}
+                {% elif w_done %}
+            {% else %}
+                <label style="font-size: small" for="fName">Reason for Denial:</label>
+            <textarea class="form-control"  placeholder="Required" style="max-width: 650px;" rows="3" name="denyyy" ></textarea>
+            <br>
+            <input style="margin-left: 0px" class="btn  btn-danger " type="submit" value="Deny">
+            <a href="client_approve/" id="c_approve" name="c_approve" class="btn btn-success">Approve</a>
+                <br>
+            {% endif %}
+         {% endif %}
+         {% endif %}
+         <br>
+         {% if int_date  %}
+             {% if oh %}
+                 {% else %}
+                 {% if admin%}
+
+             <a href="revert/" id="revet" name="revet" class="btn btn-danger">Revert Approval</a>
+                     {% endif %}
+                 {% endif %}
+             {% endif %}
+         {% if cust_date  %}
+             {% if oh %}
+                 {% else %}
+                 {% if baby%}
+
+                    <a href="revert/" id="revet" name="revet" class="btn btn-danger">Revert Approval</a>
+                     {% endif %}
+                 {% endif %}
+             {% endif %}
+         {% if w_date  %}
+             {% if oh %}
+                 {% else %}
+                 {% if adminn%}
+
+                    <a href="revert/" id="revet" name="revet" class="btn btn-danger">Revert Approval</a>
+                     <br>
+                     <br>
+                     {% endif %}
+                 {% endif %}
+             {% endif %}
+         {% if oh %}
+
+   {% if ad %}
+                 <a href="delete/" id="delete" name="delete" class="btn btn-danger">Delete</a>
+                 {% endif %}
+             {% else %}
+
+             {% if admin or holy %}
+             <a href="close/" id="close" name="close" class="btn btn-warning">Close</a>
+                 {% endif %}
+             {% if adminn %}
+                 <a href="close/" id="close" name="close" class="btn btn-warning">Close</a>
+                 {% endif %}
+         {% endif %}
+         <a href="export/" id="export" name="export" class="btn btn-primary">Export</a>
+         </form>
+      </div>
+      {% else %}
+      <div class="pull-left">
+         {% if closi %}
+         <form action="/dash/{{ user.id }}/view_closed/" method="post">
+            {% csrf_token %}
+                   <label style="font-size: small" for="fName">Company:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" id = "company" name="company">
+    {% if client %}
+        <option id= "{{ company.id }}">{{ company.name }}</option>
+        {% else %}
+        {% for comp in company %}
+            <option id= {{ comp.id }}>{{ comp.name }}</option>
+        {% endfor %}
+        {% endif %}
+    </select>
+    <label style="min-width: 215px; font-size: small" for="fName">Location:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" id="location" name="location">
+
+    </select>
+            <br>
+            <a href="" id="cancel" name="cancel" class="btn btn-warning">Clear</a>
+            <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Filter">
+         </form>
+         {% else %}
+         <form action="/dash/{{ user.id }}/view/" method="post">
+            {% csrf_token %}
+            <label style="font-size: small" for="fName">Company:</label>
+    <select style="max-width: 225px; margin-left: 0px;" class="form-control" id = "company" name="company">
+    {% if client %}
+        <option id= "{{ company.id }}">{{ company.name }}</option>
+        {% else %}
+        {% for comp in company %}
+            <option id= {{ comp.id }}>{{ comp.name }}</option>
+        {% endfor %}
+
+        {% endif %}
+    </select>
+    <label style="font-size: small" for="fName">Location:</label>
+    <select style="min-width: 215px; max-width: 225px; margin-left: 0px;" class="form-control" id="location" name="location">
+
+    </select>
+
+
+            <br>
+            <a href="" id="cancel" name="cancel" class="btn btn-warning">Clear</a>
+            <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Filter">
+         </form>
+         {% endif %}
+      </div>
+      <div class="container">
+      <div class="jumbotron" style="margin-left: 220px;">
+         <table class="table table-striped" style="max-width: 900px;">
+            <thead>
+               <tr>
+                  <th>Title</th>
+                  <th>Company</th>
+                  <th>Location</th>
+                  <th>Infrastructure</th>
+               </tr>
+            </thead>
+            <tbody>
+               {% for change in changes %}
+               <tr>
+                  <td><a href="/dash/{{ user.id }}/view/{{ change.id }}/">{{ change.title }}</a></td>
+                  <td>{{ change.infra.location.company.name }}</td>
+                  <td>{{ change.infra.location.street }}</td>
+                  <td>{{ change.infra.name }}</td>
+               </tr>
+               {% endfor %}
+            </tbody>
+         </table>
+      </div>
+      </div>
+      <div class="" style="margin-left: 0px;">
+         {% endif %}
+      </div>
+   </body>
+</html>

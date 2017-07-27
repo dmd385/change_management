@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Denial</title>
+</head>
+<body>
+
+<form action="/dash/{{ user.id }}/view/{{ view.id }}/denial" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" for="fName">Reason for denial:</label>
+    <textarea readonly class="form-control"  style="max-width: 650px" rows="5" name="justification"></textarea>
+
+
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Create">
+</form>
+</body>
+</html>

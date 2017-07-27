@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<div class="pull-left">
+    <form action="/dash/{{ user.id }}/home/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" readonly for="fName">User Name:</label>
+    <div class="form-group">
+        <input readonly type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="username"
+               value="{{ username }}" required>
+    </div>
+
+    <label style="font-size: small" for="fName">First Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="fName"
+               value="{{ fName }}" required>
+    </div>
+    <label style="font-size: small" for="fName">Last Name:</label>
+    <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="lName"
+               value="{{ lName }}" required>
+    </div>
+    <label style="font-size: small" for="fName">E-mail:</label>
+    <div class="form-group">
+        <input type="email" style="max-width: 225px; margin-left: 0px;" class="form-control" name="email"
+               value="{{ email }}" required>
+    </div>
+    </select>
+    <label style="font-size: small" for="fName">Company:</label>
+    <select readonly  style="max-width: 225px; margin-left: 0px;" class="form-control" name="company">
+        {% for comp in company %}
+            {% if comp == companyy %}
+                <option id= {{ comp.name }} selected>{{ comp.name }}</option>
+            {% endif %}
+            <option id= {{ comp.name }}>{{ comp.name }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Edit">
+</form>
+</div>
+<div class="">
+    <div class="jumbotron" style="max-width: 900px; margin-left: 220px;">
+  <h1 class="display-3">{{ name }}</h1>
+    <br>
+        {% for loc in locs %}
+        <p class="lead">Location: {{ loc.street }}, {{ loc.town }}, {{ loc.state }}, {{ loc.zipCode }}</p>
+        {% endfor %}
+  <hr class="my-4">
+    <p>Infrastructure:</p>
+  {% for infra in infras %}
+      {% if infra.location.company == companyy %}
+      <p style="padding-left:6em">              {{ infra.name }}:         {{ infra.type.name }}         {{ infra.os.name }}:         {{ infra.location.street }}</p>
+      {% endif %}
+    {% endfor %}
+  <p class="lead">
+      <br>
+    <a class="btn btn-primary btn-lg" href="/dash/{{ user.id }}/view/" role="button">View Change Reports</a>
+  </p>
+    </div>
+</div>
+</body>
+</html>

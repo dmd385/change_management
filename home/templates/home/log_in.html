@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+{% load static from staticfiles %}
+<html>
+<head>
+    <link rel="icon" type="image/png" href="{% static 'ps.png' %}" />
+    <meta charset="utf-8">
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+
+    <style type="text/css">
+
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<nav class="navbar  navbar-fixed-top navbar-default" style="background-color: #5691ef;" role="navigation">
+    <div class="navbar-header">
+    </div>
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <a href="/home/">
+            <img style="margin-top: 3px;"
+                 src="{% static 'header.png' %}"
+                 class="pull-left" width="50">
+        </a>
+
+    </div>
+    {% if user.is_authenticated %}
+        <meta http-equiv="refresh" content="0;url=http://127.0.0.1:8000/dash/{{ user.id }}/" />
+    {% else %}
+    {% endif %}
+</nav>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<div class="container">
+
+    <div class = "container" style = max-width:400px>
+	<div class="wrapper">
+        {% if error %}
+            <div class="alert alert-danger"
+             style="max-width: 1200px; margin-left: auto; margin-right: auto;">{{ error }}</div>
+        {% endif %}
+        {% if message %}
+            <div class="alert alert-success"
+             style="max-width: 1200px; margin-left: auto; margin-right: auto;">{{ message }}</div>
+        {% endif %}
+		<form action="/home/" method="post" name="Login_Form" class="form-signin">
+            {% csrf_token %}
+		    <h3  style="padding-left: 100px" class="form-signin-heading">Please Sign In</h3>
+			  <hr class="colorgraph"><br>
+
+			  <input type="text" class="form-control" name="username" placeholder="Username" required="" autofocus="" />
+              <br>
+			  <input type="password" class="form-control" name="password" placeholder="Password" required=""/>
+              <br>
+			  <button class="btn btn-lg btn-primary btn-block"  name="Submit" value="Login" type="Submit">Login</button>
+		</form>
+	</div>
+</div>
+</div>
+<nav class="navbar navbar-default navbar-fixed-bottom swag-line swag-line-bottom" style="background-color: #5691ef;"
+     role="navigation">
+    <div class="navbar-brand" style="color: black">Pervasive Solutions 2017</div>
+
+    </div>
+</nav>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static from staticfiles %}
+<head>
+
+    <link rel="icon" type="image/png" href="{% static 'ps.png' %}" />
+    <meta charset="utf-8">
+    <title>{{ tab.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.js' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap-glyphicons.css' %}"/>
+
+    <style type="text/css">
+        body {
+            font-size: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+<nav class="navbar navbar-default navbar-fixed-top" style="background-color: #5691ef;" role="navigation">
+    <div class="navbar-header">
+    </div>
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <a href="/dash/{{ user.id }}/">
+            <img style="margin-left: 5px; margin-top: 2px; margin-bottom: 3px;"
+                 src="{% static 'header.png' %}"
+                 class="pull-left" width="50">
+        </a>
+
+        <form class="form-inline" action="/home/logout/" method="post">
+            {% csrf_token %}
+            <input style="margin-right:5px; margin-top: 10px;" class="btn btn-danger pull-right" type="submit" value="Log out">
+
+        </form>
+
+
+    </div>
+</nav>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
+</script>
+<script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js">
+</script>
+
+
+{% if userr.id == user.id %}
+
+<div class="center-block" style="padding-top: 100px">
+    <div class="container">
+
+        <ul style="margin-right: 4px" class="nav nav-tabs nav-justified">
+            {% for t in tabs %}
+                <li style="margin-right: 60px;" {% if t.id == tab.id %}class="active"{% endif %}>
+                    <a href="/dash/{{ user.id }}/{{ t.url }}">{{ t.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <br>
+    <div class="container">
+        {% include tab.template %}
+    </div>
+</div>
+{% else %}
+    <br><br><br><br>
+    <div class="alert alert-danger"
+             style="max-width: 800px; text-align: center; margin-left: auto; margin-right: auto;">YOU DO NOT HAVE ACCESS TO THIS PAGE!</div>
+    <script>setTimeout(function(){window.location.href="/dash/{{ user.id }}/"},3000);</script>
+
+{% endif %}
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation"
+     style="background-color: #5691ef;">
+    <div class="navbar-brand" style="color: black" href="/">Pervasive Solutions 2017</div>
+
+</nav>
+</body>
+</html>
