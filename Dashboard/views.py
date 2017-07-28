@@ -82,7 +82,8 @@ def calendar(request, user_id):
         else:
             content['dates'] = Change.objects.filter(request_user=user)
 
-
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -126,6 +127,8 @@ def newUser(request, user_id):
                'company': companys,
                'good': success
                }
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -164,6 +167,9 @@ def editUser(request, user_id, edit_id):
         dataLogger.info(datetime.today().strftime(
             "%m/%d/%Y %H:%M")+": "+
         user.username + " editedUser " + edit.company.name + ": " + edit.username + " " )
+
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -171,6 +177,7 @@ def editUser(request, user_id, edit_id):
 def choose(request, user_id):
     user = User.objects.get(pk=user_id)
     if user.groups.filter(name='admin').exists():
+
         return HttpResponseRedirect('/dash/'+str(user_id)+'/view/')
     else:
         return HttpResponseRedirect('/dash/' + str(user_id) + '/home/')
@@ -213,6 +220,8 @@ def home(request, user_id):
     content['locs'] = Location.objects.filter(company=edit.company)
     content['name'] = edit.company.name
     content['infras'] = Infra.objects.order_by('location__company__name')
+    if edit.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -235,6 +244,8 @@ def passReset(request, user_id, edit_id):
                    'company': companys,
                    'good': "Password reset for: " + edit.username
                    }
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -265,6 +276,8 @@ def newCompany(request, user_id):
                 'locs': Location.objects.order_by('company__name'),
                 'comps': Company.objects.order_by('name')
                 }
+        if user.groups.filter(name='admin').exists():
+            content['admin'] = "tru"
         return render(request, 'Dashboard/dash.html', content)
 
 
@@ -300,6 +313,8 @@ def editLocation(request, user_id, location_id):
         dataLogger.info(datetime.today().strftime(
             "%m/%d/%Y %H:%M")+": "+
             user.username + " editedLocation " + location.company.name+": "+location.street)
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -319,6 +334,8 @@ def deleteLocation(request,user_id,location_id):
                'locs': Location.objects.order_by('company__name'),
                'comps': Company.objects.all()
                }
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -350,17 +367,19 @@ def newLocation(request, user_id):
                }
     if bet == 1:
         content['good'] = "New Location created successfully"
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
 @login_required()
 def dashboard(request, user_id):
-    user = User.objects.get(pk=user_id).id
+    user = User.objects.get(pk=user_id)
     content = {'userr': user,
                'tabs': getTabs(user_id),
                'tab': tabView}
     if user.groups.filter(name='admin').exists():
-        content['admin'] = 'true'
+        content['admin'] = "true"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -395,6 +414,8 @@ def newInfra(request, user_id):
         }
     if bet == 1:
         content['good'] = "Infrastructure created successfully"
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -432,6 +453,8 @@ def editInfra(request, user_id, infra_id):
         dataLogger.info(datetime.today().strftime(
             "%m/%d/%Y %H:%M")+": "+
             user.username + " editedInfrastructure " + infra.location.company.name+": "+infra.name)
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -456,6 +479,8 @@ def deleteInfra(request, user_id, infra_id):
     dataLogger.info(datetime.today().strftime(
             "%m/%d/%Y %H:%M")+": "+
         user.username + " deleted infrastructure " + name)
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -479,6 +504,8 @@ def newOS(request, user_id):
         'tab': tabNewInfra
     }
     content['good'] = "OS created successfully"
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -509,6 +536,8 @@ def newInfraType(request, user_id):
         }
     if bet==1:
         content['good'] = "Infrastructure Type created successfully"
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -687,6 +716,7 @@ def viewDetail(request, user_id, view_id):
     if view.internal_auth is False and view.internal_auth_date is None:
         content['idenied'] = "dd"
         content['int_deny'] = view.internal_deny_exp
+
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -871,6 +901,8 @@ def viewClosed(request, user_id):
             content['client'] = 'ya'
             content['company'] = user.company
     content['closi'] = "how"
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -916,6 +948,8 @@ def view(request, user_id):
             content['locs'] = Location.objects.filter(company=user.company)
             content['client'] = 'ya'
             content['company'] = user.company
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -958,6 +992,8 @@ def create(request, user_id):
     }
     if bet==1:
         content['good'] = "Change created"
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -985,6 +1021,8 @@ def delete(request, user_id, view_id):
         else:
 
             content['locs'] = Location.objects.filter(company=user.company)
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -997,7 +1035,8 @@ def logs(request, user_id):
         content['tab'] = tabLogs
         content['userr'] = me
         content['users'] = User.objects.order_by('company__name')
-
+        if me.groups.filter(name='admin').exists():
+            content['admin'] = "tru"
         return render(request, 'Dashboard/dash.html', content)
     else:
         processed_lines = []

@@ -80,7 +80,11 @@
 <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation"
      style="background-color: #5691ef;">
     <div class="navbar-brand" style="color: black" href="/">Pervasive Solutions 2017</div>
-    <a href = "/dash/{{ user.id }}/super_admin/" style="margin-right:5px; margin-top: 9px;" class = "btn btn-warning pull-right">Super Admin</a>
+    {% if admin %}
+        <a href = "/dash/{{ user.id }}/super_admin/" style="margin-right:5px; margin-top: 9px;" class = "btn btn-warning pull-right">Super Admin: {{ userr.super_admin }}</a>
+        {% else %}
+
+    {% endif %}
 </nav>
 </body>
 </html>
