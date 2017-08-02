@@ -267,7 +267,7 @@ def newCompany(request, user_id):
                'tab': tabNewCompany,
                'locs': Location.objects.order_by('company__name'),
                'good': "Company created successfully",
-               'comps': Company.objects.all()}
+               'comps': Company.objects.order_by('name')}
         return render(request, 'Dashboard/dash.html', content)
     else:
         content = {'userr': user,
@@ -279,6 +279,52 @@ def newCompany(request, user_id):
         if user.groups.filter(name='admin').exists():
             content['admin'] = "tru"
         return render(request, 'Dashboard/dash.html', content)
+
+
+@login_required()
+def editCompany(request, user_id, company_id):
+    user = User.objects.get(pk=user_id)
+    content = {'userr': user,
+               'tabs': getTabs(user_id),
+               'tab': tabNewCompany,
+               'locs': Location.objects.order_by('company__name'),
+               'comp': Company.objects.get(pk=company_id),
+               'i': "ya",
+               'comps': Company.objects.all()}
+    if request.method == "POST":
+        company = Company.objects.get(pk=company_id)
+        company.name = request.POST.get('compName')
+        company.save()
+        content['good'] = "Company " + company.name + " edited"
+        dataLogger = logging.getLogger("dataLogger")
+        dataLogger.info(datetime.today().strftime("%m/%d/%Y %H:%M") + ": " +
+                        user.username + " editedCompany " + company.name)
+    else:
+        if user.groups.filter(name='admin').exists():
+            content['admin'] = "tru"
+    return render(request, 'Dashboard/dash.html', content)
+
+
+@login_required()
+def deleteCompany(request, user_id, company_id):
+    user = User.objects.get(pk=user_id)
+    company = Company.objects.get(pk=company_id)
+    sti = company.name
+    company.delete()
+    dataLogger = logging.getLogger("dataLogger")
+    dataLogger.info(datetime.today().strftime(
+        "%m/%d/%Y %H:%M") + ": " +
+                    user.username + " deletedCompany " + sti)
+    content = {'userr': user,
+               'tabs': getTabs(user_id),
+               'tab': tabNewCompany,
+               'locs': Location.objects.order_by('company__name'),
+               'comps': Company.objects.all()
+               }
+    if user.groups.filter(name='admin').exists():
+        content['admin'] = "tru"
+        content['good'] = "Company " + sti +  " deleted"
+    return render(request, 'Dashboard/dash.html', content)
 
 
 @login_required()
@@ -548,7 +594,7 @@ def viewDetail(request, user_id, view_id):
     user = User.objects.get(pk=user_id)
     dataLogger = logging.getLogger("dataLogger")
     if request.method == 'POST':
-        if(request.POST.get('denyyy') is None and request.POST.get('denyyy')!=""):
+        if(request.POST.get('denyyy') != ""):
             if user.groups.filter(name='admin').exists():
                 view.internal_auth=False
                 view.internal_auth_date=datetime.today()
@@ -710,10 +756,10 @@ def viewDetail(request, user_id, view_id):
         content['tab'] = tabViewClosed
         content['close'] = datetime.strftime(view.close_date, "%m/%d/%Y %H:%M")
         content['closeU'] = view.close_user.username
-    if view.customer_auth is False and view.customer_auth_date is None:
+    if view.customer_auth is False and view.customer_auth_date is not None:
         content['denied'] = " dd"
         content['cust_deny']=view.customer_deny_exp
-    if view.internal_auth is False and view.internal_auth_date is None:
+    if view.internal_auth is False and view.internal_auth_date is not None:
         content['idenied'] = "dd"
         content['int_deny'] = view.internal_deny_exp
 
@@ -950,6 +996,7 @@ def view(request, user_id):
             content['company'] = user.company
     if user.groups.filter(name='admin').exists():
         content['admin'] = "tru"
+        content['fire'] = "fire2"
     return render(request, 'Dashboard/dash.html', content)
 
 
@@ -1058,6 +1105,7 @@ def logs(request, user_id):
                     ((eventType is None) or eventType == split_line[3]) and
                     ((start <= time) and (end >= time))):
                 processed_lines.append(split_line)
+        logString = " "
         for chosen_one in processed_lines:
             for one in chosen_one:
                 logString += one

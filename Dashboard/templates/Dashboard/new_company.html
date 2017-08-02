@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>New Company</title>
+
 </head>
 <body>
 
@@ -18,10 +19,27 @@
 
 <div class="row">
 <div class="pull-left">
+{% if i %}
+<form action="/dash/{{ user.id }}/edit_company/{{ comp.id }}/" method="post">
+    {% csrf_token %}
+    <label style="font-size: small" for="fName">Company:</label>
+
+        <div class="form-group">
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="compName"
+               value="{{ comp.name }}" required>
+    </div>
+
+
+    <a href="/dash/{{ user.id }}/edit_company/{{ comp.id }}/delete/" class="btn btn-danger">Delete</a>
+    <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Edit">
+
+</form>
+{% else %}
 <form action="/dash/{{ user.id }}/new_company/" method="post">
     {% csrf_token %}
     <label style="font-size: small" for="fName">Company:</label>
-    <div class="form-group">
+
+        <div class="form-group">
         <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="compName"
                placeholder="Company Name" required>
     </div>
@@ -31,6 +49,7 @@
     <input style="margin-left: 0px" class="btn  btn-success " type="submit" value="Create">
 
 </form>
+{% endif %}
 <br>
 {% if edit %}
     <form action="/dash/{{ user.id }}/edit_location/{{ id }}/" method = "post">
@@ -53,7 +72,7 @@
                value="{{ zip }}" pattern=".{5,5}"   required title="Zip codes have 5 digits">
     </div>
     <div class="form-group">
-        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" name="phone"
+        <input type="text" style="max-width: 225px; margin-left: 0px;" class="form-control" id = "phone" name="phone"
                value="{{ phone }}" pattern=".{9,10}"   required title="9 Digits minimum">
     </div>
     <select readonly style="max-width: 225px; margin-left: 0px;" class="form-control" name="company">
@@ -119,7 +138,7 @@
     <tbody>
         {% for loc in locs %}
             <tr>
-                <td>{{ loc.company.name }}</td>
+                <td><a href = "/dash/{{ user.id }}/edit_company/{{ loc.company.id }}/">{{ loc.company.name }}</a></td>
                 <td><a href="/dash/{{ user.id }}/edit_location/{{ loc.id }}/"> {{ loc.street }}</a></td>
                 <td>{{ loc.town }}</td>
                 <td>{{ loc.phone }}</td>
